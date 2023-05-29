@@ -1,16 +1,30 @@
 const canvasSketch = require("canvas-sketch");
 const { lerp } = require("canvas-sketch-util/math");
 const random = require("canvas-sketch-util/random");
-const colors = require("./colors");
 
 const settings = {
   dimensions: [2048, 2048],
 };
 
+const colors = [
+  "#7FB1FF",
+  "#A1E9FF",
+  "#BFC0FF",
+  "#7869F1",
+  "#FFB6E4",
+  "#FEC896",
+  "#FFE87F",
+  "#83FFC1",
+];
+
 const sketch = () => {
   const createGrid = () => {
     const points = [];
-    const count = 20;
+    const count = random.rangeFloor(50, 80);
+
+    const colorCount = random.rangeFloor(1, 8);
+    const colorsToPickFrom = random.shuffle(colors);
+    const palette = colorsToPickFrom.slice(0, colorCount);
 
     for (let x = 0; x < count; x++) {
       for (let y = 0; y < count; y++) {
@@ -18,7 +32,8 @@ const sketch = () => {
         const v = count <= 1 ? 0.5 : y / (count - 1);
 
         points.push({
-          radius: Math.abs(random.gaussian() * 0.01),
+          color: random.pick(palette),
+          radius: Math.abs(random.gaussian() * 0.003),
           position: [u, v],
         });
       }
@@ -27,7 +42,7 @@ const sketch = () => {
     return points;
   };
 
-  random.setSeed(512);
+  // random.setSeed(512);
   const points = createGrid().filter(() => random.value() > 0.5);
   const margin = 200;
 
@@ -38,6 +53,7 @@ const sketch = () => {
       const {
         position: [u, v],
         radius,
+        color,
       } = data;
 
       const x = lerp(margin, width - margin, u);
@@ -45,12 +61,9 @@ const sketch = () => {
 
       context.beginPath();
       context.arc(x, y, radius * width, 0, Math.PI * 2, false);
-      context.strokeStyle = "black";
+      // context.strokeStyle = "black";
       context.lineWidth = 1;
-      const keys = Object.keys(colors);
-      const randomKey = keys[Math.floor(Math.random() * keys.length)];
-      const randomColor = colors[randomKey];
-      context.fillStyle = randomColor;
+      context.fillStyle = color;
       context.fill();
     });
   };
